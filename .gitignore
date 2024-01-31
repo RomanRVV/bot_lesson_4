@@ -3,3 +3,5 @@ venv/Lib
 venv
 .env
 quiz-questions.zip
+.idea
+test.py
