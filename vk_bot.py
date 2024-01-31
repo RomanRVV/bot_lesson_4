@@ -82,8 +82,8 @@ def main():
     env = Env()
     env.read_env()
 
-    r = redis.Redis(host="redis-19211.c322.us-east-1-2.ec2.cloud.redislabs.com",
-                    port='19211',
+    r = redis.Redis(host=env('REDIS_HOST'),
+                    port=env('REDIS_PORT'),
                     password=env('REDIS_PASSWORD'),
                     decode_responses=True)
 
