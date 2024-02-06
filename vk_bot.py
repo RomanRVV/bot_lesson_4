@@ -107,15 +107,16 @@ def main():
     vk_api = vk_session.get_api()
     longpoll = VkLongPoll(vk_session)
     for event in longpoll.listen():
-        if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-            if event.text == 'Начать':
-                start_chatting(event, vk_api)
-            elif event.text == 'Новый вопрос':
-                handle_new_question_request(event, vk_api, r)
-            elif event.text == 'Сдаться':
-                handle_give_up(event, vk_api, r)
-            else:
-                handle_solution_attempt(event, vk_api, r)
+        if not (event.type == VkEventType.MESSAGE_NEW and event.to_me):
+            continue
+        if event.text == 'Начать':
+            start_chatting(event, vk_api)
+        elif event.text == 'Новый вопрос':
+            handle_new_question_request(event, vk_api, r)
+        elif event.text == 'Сдаться':
+            handle_give_up(event, vk_api, r)
+        else:
+            handle_solution_attempt(event, vk_api, r)
 
 
 if __name__ == "__main__":
