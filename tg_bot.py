@@ -11,9 +11,6 @@ from enum import Enum
 
 from questions_and_answers import get_questions_and_answers
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +78,10 @@ def cancel(update, context):
 
 
 def main() -> None:
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+    )
+    logger.info("Запуск ТГ бота")
 
     env = Env()
     env.read_env()

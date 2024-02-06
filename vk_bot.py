@@ -9,6 +9,10 @@ from vk_api.utils import get_random_id
 from environs import Env
 
 from questions_and_answers import get_questions_and_answers
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def start_chatting(event, vk_api):
@@ -79,6 +83,12 @@ def handle_give_up(event, vk_api, r):
 
 
 def main():
+
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+    )
+    logger.info("Запуск ВК бота")
+
     env = Env()
     env.read_env()
 
