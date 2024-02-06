@@ -14,6 +14,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+questions_and_answers = get_questions_and_answers("questions")
+
 
 def start_chatting(event, vk_api):
     keyboard = VkKeyboard(one_time=False)
@@ -35,7 +37,8 @@ def start_chatting(event, vk_api):
 def handle_new_question_request(event, vk_api, r):
     user_id = event.user_id
 
-    questions_and_answers = get_questions_and_answers("questions")
+    global questions_and_answers
+
     pair = list(questions_and_answers.items())
     random_pair = random.choice(pair)
     current_question = random_pair[0]
@@ -50,7 +53,9 @@ def handle_new_question_request(event, vk_api, r):
 
 def handle_solution_attempt(event, vk_api, r):
     user_id = event.user_id
-    questions_and_answers = get_questions_and_answers("questions")
+
+    global questions_and_answers
+
     correct_answer = questions_and_answers[r.get(user_id)]
     user_answer = event.text
 
@@ -69,7 +74,8 @@ def handle_solution_attempt(event, vk_api, r):
 def handle_give_up(event, vk_api, r):
     user_id = event.user_id
 
-    questions_and_answers = get_questions_and_answers("questions")
+    global questions_and_answers
+
     correct_answer = questions_and_answers[r.get(user_id)]
 
     message = (f'Правильный ответ на последний вопрос - "{correct_answer}".'

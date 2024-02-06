@@ -11,13 +11,16 @@ from enum import Enum
 
 from questions_and_answers import get_questions_and_answers
 
-
 logger = logging.getLogger(__name__)
 
 
 class BotStates(Enum):
     QUESTION = 0
     SOLUTION_ATTEMPT = 1
+
+
+# Загрузка вопросов и ответов
+questions_and_answers = get_questions_and_answers("questions")
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -34,7 +37,7 @@ def start(update: Update, context: CallbackContext) -> None:
 def handle_new_question_request(update: Update, context: CallbackContext, r) -> None:
     user_id = update.effective_user.id
 
-    questions_and_answers = get_questions_and_answers("questions")
+    global questions_and_answers
     pair = list(questions_and_answers.items())
     random_pair = random.choice(pair)
     current_question = random_pair[0]
@@ -48,7 +51,8 @@ def handle_new_question_request(update: Update, context: CallbackContext, r) -> 
 def handle_solution_attempt(update, context, r):
 
     user_id = update.effective_user.id
-    questions_and_answers = get_questions_and_answers("questions")
+
+    global questions_and_answers
     correct_answer = questions_and_answers[r.get(user_id)]
     user_answer = update.message.text
 
@@ -63,7 +67,8 @@ def handle_solution_attempt(update, context, r):
 def handle_give_up(update, context, r):
 
     user_id = update.effective_user.id
-    questions_and_answers = get_questions_and_answers("questions")
+
+    global questions_and_answers
     correct_answer = questions_and_answers[r.get(user_id)]
 
     update.message.reply_text(f'Правильный ответ на последний вопрос - "{correct_answer}".'
@@ -98,7 +103,6 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
-
             BotStates.QUESTION: [MessageHandler(Filters.regex('Новый вопрос'),
                                                 lambda update, context:
                                                 handle_new_question_request(update, context, r))],
