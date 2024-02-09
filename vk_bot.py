@@ -14,8 +14,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-questions_and_answers = get_questions_and_answers("questions")
-
 
 def start_chatting(event, vk_api):
     keyboard = VkKeyboard(one_time=False)
@@ -34,10 +32,8 @@ def start_chatting(event, vk_api):
     )
 
 
-def handle_new_question_request(event, vk_api, r):
+def handle_new_question_request(event, vk_api, r, questions_and_answers):
     user_id = event.user_id
-
-    global questions_and_answers
 
     pair = list(questions_and_answers.items())
     random_pair = random.choice(pair)
@@ -51,10 +47,8 @@ def handle_new_question_request(event, vk_api, r):
     )
 
 
-def handle_solution_attempt(event, vk_api, r):
+def handle_solution_attempt(event, vk_api, r, questions_and_answers):
     user_id = event.user_id
-
-    global questions_and_answers
 
     correct_answer = questions_and_answers[r.get(user_id)]
     user_answer = event.text
@@ -71,10 +65,8 @@ def handle_solution_attempt(event, vk_api, r):
     )
 
 
-def handle_give_up(event, vk_api, r):
+def handle_give_up(event, vk_api, r, questions_and_answers):
     user_id = event.user_id
-
-    global questions_and_answers
 
     correct_answer = questions_and_answers[r.get(user_id)]
 
@@ -98,6 +90,8 @@ def main():
     env = Env()
     env.read_env()
 
+    questions_and_answers = get_questions_and_answers("questions")
+
     r = redis.Redis(host=env('REDIS_HOST'),
                     port=env('REDIS_PORT'),
                     password=env('REDIS_PASSWORD'),
@@ -112,11 +106,11 @@ def main():
         if event.text == 'Начать':
             start_chatting(event, vk_api)
         elif event.text == 'Новый вопрос':
-            handle_new_question_request(event, vk_api, r)
+            handle_new_question_request(event, vk_api, r, questions_and_answers)
         elif event.text == 'Сдаться':
-            handle_give_up(event, vk_api, r)
+            handle_give_up(event, vk_api, r, questions_and_answers)
         else:
-            handle_solution_attempt(event, vk_api, r)
+            handle_solution_attempt(event, vk_api, r, questions_and_answers)
 
 
 if __name__ == "__main__":

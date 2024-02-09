@@ -19,10 +19,6 @@ class BotStates(Enum):
     SOLUTION_ATTEMPT = 1
 
 
-# Загрузка вопросов и ответов
-questions_and_answers = get_questions_and_answers("questions")
-
-
 def start(update: Update, context: CallbackContext) -> None:
     custom_keyboard = [['Новый вопрос', 'Сдаться'],
                        ['Мой счет']]
@@ -34,10 +30,8 @@ def start(update: Update, context: CallbackContext) -> None:
     return BotStates.QUESTION
 
 
-def handle_new_question_request(update: Update, context: CallbackContext, r) -> None:
+def handle_new_question_request(update: Update, context: CallbackContext, r, questions_and_answers) -> None:
     user_id = update.effective_user.id
-
-    global questions_and_answers
     pair = list(questions_and_answers.items())
     random_pair = random.choice(pair)
     current_question = random_pair[0]
@@ -48,11 +42,9 @@ def handle_new_question_request(update: Update, context: CallbackContext, r) -> 
     return BotStates.SOLUTION_ATTEMPT
 
 
-def handle_solution_attempt(update, context, r):
+def handle_solution_attempt(update, context, r, questions_and_answers):
 
     user_id = update.effective_user.id
-
-    global questions_and_answers
     correct_answer = questions_and_answers[r.get(user_id)]
     user_answer = update.message.text
 
@@ -64,11 +56,9 @@ def handle_solution_attempt(update, context, r):
         return BotStates.SOLUTION_ATTEMPT
 
 
-def handle_give_up(update, context, r):
+def handle_give_up(update, context, r, questions_and_answers):
 
     user_id = update.effective_user.id
-
-    global questions_and_answers
     correct_answer = questions_and_answers[r.get(user_id)]
 
     update.message.reply_text(f'Правильный ответ на последний вопрос - "{correct_answer}".'
@@ -98,6 +88,8 @@ def main() -> None:
 
     updater = Updater(env('TG_API_TOKEN'))
 
+    questions_and_answers = get_questions_and_answers("questions")
+
     dispatcher = updater.dispatcher
 
     conv_handler = ConversationHandler(
@@ -105,13 +97,15 @@ def main() -> None:
         states={
             BotStates.QUESTION: [MessageHandler(Filters.regex('Новый вопрос'),
                                                 lambda update, context:
-                                                handle_new_question_request(update, context, r))],
+                                                handle_new_question_request(update, context, r,
+                                                                            questions_and_answers))],
             BotStates.SOLUTION_ATTEMPT: [MessageHandler(Filters.regex('Сдаться'),
                                                         lambda update, context:
-                                                        handle_give_up(update, context, r)),
+                                                        handle_give_up(update, context, r, questions_and_answers)),
                                          MessageHandler(Filters.text & ~Filters.command,
                                                         lambda update, context:
-                                                        handle_solution_attempt(update, context, r))],
+                                                        handle_solution_attempt(update, context, r,
+                                                                                questions_and_answers))],
         },
         fallbacks=[CommandHandler('cancel', cancel)]
     )
